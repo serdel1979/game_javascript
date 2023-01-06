@@ -1,0 +1,46 @@
+<script>
+
+    //programa principal
+    
+    
+    setInterval(bucle_pricipal,50);
+
+    
+    
+    function bucle_pricipal(){
+        let canvas = document.getElementById("pantalla");
+        let ctx = canvas.getContext("2d");
+    
+        //borrar dibujo
+        borrar_lienzo(ctx);
+        poligono(ctx);
+    
+    }
+    
+    let canvas = document.getElementById("pantalla");
+    let ctx = canvas.getContext("2d");
+   
+    borrar_lienzo(ctx);
+    poligono(ctx);
+    
+    function borrar_lienzo(ctx){
+        ctx.fillStyle = "rgb(255,255,255)";
+        ctx.fillRect(0,0,150,150);
+    }
+    
+    function poligono(ctx){
+        let ancho = 10;
+        let alto = 15;
+        let coordenadas = [{x:50,y:0},{x:100,y:50},{x:50,y:100},{x:0,y:50}];
+        ctx.fillStyle = "rgb(128, 128, 128)";
+        ctx.beginPath();
+        for(var i = 0; i < coordenadas.length; i++){
+            ctx.lineTo(coordenadas[i].x,coordenadas[i].y);
+        }
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    </script>
+    
+    <canvas style="transform: scaleY(-1);" id="pantalla" width="150" height="150"></canvas>

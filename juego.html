@@ -1,0 +1,91 @@
+<script>
+
+var mundo = {
+    nivel : {
+        alturas : [1,1,2,2,3,3,4,4,5,6,6,5,4],
+        bloque: {
+            ancho : 100,
+            alto : 40
+        }
+    },
+    camara : {
+        alto : 500,
+        ancho: 700
+    },
+    jugador: {
+        alto: 40,
+        ancho: 20,
+        x: 0,
+        y: 0,
+        velocidad : 6
+    }
+};
+
+//programa principal
+
+let terminado = false;
+
+setInterval(bucle_pricipal,50);
+
+function bucle_pricipal(){
+    let canvas = document.getElementById("pantalla");
+    let ctx = canvas.getContext("2d");
+
+    avanza_jugador();
+    //borrar dibujo
+    borrar_lienzo(ctx);
+    dibuja_suelo(ctx);
+    dibuja_Jugador(ctx);
+
+}
+
+function avanza_jugador(){
+    //avanza hacia adelante
+    mundo.jugador.x = mundo.jugador.x + mundo.jugador.velocidad;
+    let ancho_bloque = mundo.nivel.bloque.ancho;
+    let alto_bloque = mundo.nivel.bloque.alto;
+    let ancho_jug = mundo.jugador.ancho;
+    let alto_jug = mundo.jugador.alto;
+    let bloque_num = Math.floor(mundo.jugador.x / mundo.nivel.bloque.ancho);
+    let altura1 = mundo.nivel.alturas[bloque_num] * alto_bloque;
+    let altura2 = mundo.nivel.alturas[bloque_num + 1] * alto_bloque;
+    let ratio = (mundo.jugador.x % ancho_bloque)/ancho_bloque; 
+
+    mundo.jugador.y = altura1 + ratio * (altura2-altura1) + alto_jug / 2;
+}
+
+function borrar_lienzo(ctx){
+    ctx.fillStyle = "rgb(255,255,255)";
+    ctx.fillRect(0,0,1900,600);
+}
+
+function dibuja_suelo(ctx){
+    let { ancho, alto} = mundo.nivel.bloque;
+    let { alturas } = mundo.nivel;
+    ctx.fillStyle = "rgb(100,75,50)";
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    for(var i = 0; i < alturas.length; i++){
+        let altura = alturas[i];
+        let x = i * ancho;
+        let y = altura * alto;
+        ctx.lineTo(x,y);
+    }
+    ctx.lineTo(ctx.canvas.width,0);
+    ctx.closePath();
+    ctx.fill();
+}
+
+function dibuja_Jugador(ctx){
+    let { ancho, alto, x, y} = mundo.jugador;
+    ctx.fillStyle = "rgb(255,0,0)";
+    ctx.fillRect(x - ancho / 2,
+                    y - alto / 2,
+                    ancho,
+                    alto);
+}
+
+
+</script>
+
+<canvas style="transform: scaleY(-1);" id="pantalla" width="1900" height="600"></canvas>

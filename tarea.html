@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script>
+        // creamos el canvas de forma dinámica
+        let canvas = document.createElement("canvas");	
+        canvas.width = 300;
+        canvas.height= 200;
+        
+        var mundo = {
+        
+            jugador: {
+                x: 0,
+                y: 150,
+                ancho: 30,
+                alto: 50,
+                velocidad: 4
+            }
+            
+        };
+        
+        setInterval(bucle_principal, 100);
+        
+        function bucle_principal()
+        {
+            borra_canvas();
+            
+            avanza_jugador()
+            
+            dibuja_jugador();
+            
+            console.log("la posicion X-Y del jugador es = " + mundo.jugador.x + " " + mundo.jugador.y);
+        }
+        
+        function borra_canvas()
+        {
+            let ctx = canvas.getContext("2d");	
+        
+            ctx.fillStyle = "rgb(255, 255, 255)";
+            ctx.fillRect(0, 0, 400, 300);
+        }
+        
+        function avanza_jugador()
+        {
+            // haz que el jugador avance en el eje X según su velocidad
+            // deberás acceder al modelo de datos del jugador
+            
+            mundo.jugador.x = mundo.jugador.x + mundo.jugador.velocidad;
+        }
+        
+        function dibuja_jugador() {
+            // dibuja al jugador en la posición x, y actual del jugador
+            // puedes hacerlo dibujando un rectángulo de las medidas del jugador
+            let ctx = canvas.getContext("2d");	
+            ctx.fillStyle = "rgb(0, 0, 255)";
+            ctx.fillRect(mundo.jugador.x,300- mundo.jugador.y, mundo.jugador.ancho, mundo.jugador.alto);
+        }
+        
+        </script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<style>
+	 .center {display: flex; justify-content: center}
+	 h1 {text-align: center}
+	 html, input {font-size: 16pt}
+	 label {display: inline-block; min-width: 60px}
+	 input{margin-left: 10px}
+	 input[type=number] {width: 100px}
+	 ul {margin:0; padding: 0; list-style-type: none}
+	 input[type=range] {margin: 20px 0; width: 300px; transform-origin: 300; transform: scale(1.7)}
+	 canvas {transform: scaleY(-1); border: 2px solid black; margin: 15px 0}
+</style>
+
+<body class="center">
+	<form>
+		<h1>Cálculo de posición del jugador</h1>
+		<ul>	
+		<li class="center">
+		Mueve al jugador:
+		<li class="center">
+		<input type="range" id="recorrido" value="0"  min="0" max="12" step="0.4">	
+		<li class="center"><canvas id="canvas" width="800" height="450"></canvas>	
+		<li><label for="x">X</label><input id="x" type="number" readonly> <small>Posición del jugador X</small>
+		<li><label for="y">Y</label><input id="y" type="number" readonly> <small>Posición del jugador Y</small>
+		<li><label for="n">Bloque</label><input id="n" type="number" readonly> <small>Bloque actual</small>
+		<li><label for="rb">ratio</label><input id="rb" type="number" readonly> <small>Posición dentro del bloque actual</small>
+		<li><label for="h">H</label><input id="h" type="number" readonly>	<small>Altura del terreno</small>
+		<li><label for="dy">DY</label><input id="dy" type="number" readonly> <small>Diferencia entre jugador y terreno (DY = Y - H)</small>
+		</ul>
+	</form>
+</body>
+
+
+<script>
+	
+	
+var mundo = {
+	
+	alturas: [2, 2, 1, 1, 2, 2], 
+	
+	bloque: {
+			ancho: 160,
+			alto: 120
+		},
+		
+	jugador: {
+		x : 0,
+		y: 0,
+		ancho: 100,
+		alto: 170,
+	}
+	
+};
+
+requestAnimationFrame(bucle);
+
+function bucle()
+{
+	let canvas = document.getElementById("canvas");
+	let ctx = canvas.getContext("2d");		
+	
+	actualizar_valores();
+	
+	borrar_lienzo(ctx);
+	
+	dibujar_terreno(ctx);
+	
+	dibujar_jugador(ctx);	
+
+	requestAnimationFrame(bucle);
+}
+
+function actualizar_valores()
+{	
+	let recorrido = document.getElementById("recorrido");
+	let inpx = document.getElementById("x");
+	let inpy = document.getElementById("y");
+	let inpn = document.getElementById("n");
+	let inprb = document.getElementById("rb");
+	let inph = document.getElementById("h");
+	let inpdy = document.getElementById("dy");
+	
+	let cuantos_bloques = mundo.alturas.length;
+	let total_ancho_recorrido = cuantos_bloques * mundo.bloque.ancho;
+	let total_ratio_recorrido = recorrido.value / recorrido.max;
+	let velocidad = 0.4 / recorrido.max * total_ancho_recorrido;
+	
+	// posición actual del jugador en toda la secuencia
+	mundo.jugador.x = total_ancho_recorrido * total_ratio_recorrido;	
+	
+	// posición del jugador en el anterior fotograma
+	let x_anterior =  mundo.jugador.x - velocidad;
+	
+	// calculamos las alturas del terreno cuando jugador estaba en el fotograma anterior, y en el fotograma actual
+	let h1 = calcular_altura(x_anterior);
+	let h2 = calcular_altura(mundo.jugador.x);
+	
+	let dy = h2 - h1;
+	mundo.jugador.y = h2;
+	
+	// actualizamos los valores en la tabla de datos
+	
+	inpx.value = redondea(mundo.jugador.x);
+	inpy.value = redondea(mundo.jugador.y);
+	inpn.value = Math.floor(mundo.jugador.x / mundo.bloque.ancho);
+	inprb.value = redondea((mundo.jugador.x % mundo.bloque.ancho) / mundo.bloque.ancho);
+	inph.value = redondea(h2);
+	inpdy.value = redondea(dy);
+	
+}
+
+function calcular_altura(x)
+{	
+	let bloque_num = Math.floor(x / mundo.bloque.ancho);
+	let altura1 = mundo.alturas[bloque_num];	
+	let altura2 = mundo.alturas[bloque_num + 1];
+	
+	let ratio_bloque = (x % mundo.bloque.ancho) / mundo.bloque.ancho;
+	let h =  altura1 * mundo.bloque.alto + ratio_bloque * (altura2 - altura1) * mundo.bloque.alto + mundo.jugador.alto / 2;	
+	return h;
+}
+
+function borrar_lienzo(ctx)
+{
+	ctx.fillStyle = "rgb(250, 250, 250)";
+	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+
+
+var x0 = 30;
+var y0 = -50;
+
+function dibujar_terreno(ctx)
+{
+	ctx.lineWidth = 2;
+	ctx.strokeStyle = "rgb(0,0,0)";
+	
+	let x = x0;
+	let y = y0 + mundo.bloque.alto * mundo.alturas[0];
+	//nos movemos al primer punto
+	ctx.moveTo(x, y);
+	for(var i in mundo.alturas)
+	{
+		let altura = mundo.alturas[i];
+		ctx.lineTo(x0 + mundo.bloque.ancho * i, y0 + mundo.bloque.alto * altura);
+	}
+	ctx.stroke();
+	
+	ctx.beginPath();
+	ctx.moveTo(x, y);
+	for(var i in mundo.alturas)
+	{
+		let altura = mundo.alturas[i];
+		ctx.moveTo(x0 + mundo.bloque.ancho * i, y0 + mundo.bloque.alto * altura);
+		ctx.arc(x0 + mundo.bloque.ancho * i, y0 + mundo.bloque.alto * altura, 7, 0, 2 * Math.PI);		
+	}
+	ctx.fillStyle = "blue";
+	ctx.closePath();
+	ctx.fill();
+}
+
+function dibujar_jugador(ctx)
+{	
+	let x = x0 + mundo.jugador.x ;		
+	let y = y0 + mundo.jugador.y ;
+	
+	ctx.fillStyle = "rgb(255, 0, 0)";
+	ctx.fillRect(x - mundo.jugador.ancho / 2, y - mundo.jugador.alto / 2, mundo.jugador.ancho, mundo.jugador.alto);	
+	
+	ctx.beginPath();
+	ctx.moveTo(x, y);
+	ctx.arc(x, y, 7, 0, 2 * Math.PI);
+	ctx.fillStyle = "blue";
+	ctx.fill();
+}
+
+function redondea(v)
+{
+	return Math.round(v*100)/100;
+}
+
+</script>
+	
